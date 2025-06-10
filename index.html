@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>Panel Pengawas Ujian</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f7f6;
+      display: flex;
+      min-height: 100vh;
+      overflow-x: hidden;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .main-content {
+      flex-grow: 1;
+      padding: 20px;
+      background-color: #f4f7f6;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      height: 100vh;
+      box-sizing: border-box;
+      width: 100%;
+    }
+    .container {
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    input, select, textarea {
+      padding: 12px; margin: 8px 0; width: 100%;
+      box-sizing: border-box; font-size: 16px;
+      border: 1px solid #ccc; border-radius: 6px;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: #3498db;
+      box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+      outline: none;
+    }
+    button {
+      padding: 12px 25px; margin: 10px auto;
+      display: block; font-size: 16px; cursor: pointer;
+      background-color: #3498db; color: white; border: none;
+      border-radius: 6px;
+      transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    button:hover {
+      background-color: #2980b9;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    button:active { transform: translateY(0); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .text-button {
+      padding: 10px 20px; margin: 0; font-size: 15px;
+      cursor: pointer; border: none; border-radius: 6px;
+      transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      display: inline-flex; align-items: center; gap: 8px;
+      text-align: center; white-space: nowrap;
+    }
+    .text-button:hover { background-color: #455a64; transform: translateY(-1px); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
+    .text-button:active { transform: translateY(0); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .text-button.blue-gray { background-color: #607d8b; color: white; }
+    .text-button.blue-gray:hover { background-color: #455a64; }
+    .text-button.green { background-color: #4CAF50; color: white; }
+    .text-button.green:hover { background-color: #43A047; }
+    .text-button.red { background-color: #f44336; color: white; }
+    .text-button.red:hover { background-color: #e53935; }
+    .text-button.gray { background-color: #9e9e9e; color: white; }
+    .text-button.gray:hover { background-color: #757575; }
+    .text-button.light-blue { background-color: #2196F3; color: white; }
+    .text-button.light-blue:hover { background-color: #1976D2; }
+    .text-button.orange { background-color: #FF9800; color: white; }
+    .text-button.orange:hover { background-color: #FB8C00; }
+    .icon-button {
+      background: none; border: none; cursor: pointer;
+      padding: 8px; margin: 0; display: inline-flex;
+      align-items: center; justify-content: center;
+      width: 28px; height: 28px; border-radius: 50%;
+      transition: background-color 0.2s ease, transform 0.1s ease;
+      flex-shrink: 0;
+    }
+    .icon-button:hover { background-color: #cfe2f3; transform: translateY(-1px); }
+    .icon-button:active { transform: translateY(0); }
+    .icon-button i { font-size: 16px; color: #2c3e50; }
+    .icon-button:hover i { color: #2c3e50; }
+
+    .table-responsive {
+      overflow-x: auto; -webkit-overflow-scrolling: touch;
+      border-radius: 8px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    th, td {
+      border: 1px solid #e0e0e0; padding: 10px;
+      word-wrap: break-word; text-align: left;
+      vertical-align: middle;
+    }
+    th {
+      background-color: #ecf0f1; text-align: center;
+      font-weight: bold; color: #2c3e50;
+      white-space: nowrap;
+    }
+    tr:nth-child(even) { background-color: #f9f9f9; }
+    #studentTableBody td {
+        white-space: nowrap;
+    }
+    
+    #studentTableBody td:nth-child(1), #studentTableBody td:nth-child(2), #studentTableBody td:nth-child(4), #studentTableBody td:nth-child(5), #studentTableBody td:nth-child(6), #studentTableBody td:last-child { text-align: center; }
+    .action-buttons-group { display: flex; justify-content: center; gap: 5px; flex-wrap: nowrap; flex-shrink: 0; }
+    
+    .modal {
+      display: none; position: fixed; z-index: 1000;
+      left: 0; top: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6);
+      justify-content: center; align-items: center;
+    }
+    .modal-content {
+      background: #fff; padding: 30px; border-radius: 10px;
+      width: 90%; max-width: 450px; box-sizing: border-box;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.2); text-align: center;
+    }
+    .modal h4 { color: #2c3e50; margin-top: 0; margin-bottom: 20px; font-size: 1.5em; }
+    .modal p { margin-bottom: 20px; color: #34495e; }
+    .modal button {
+      margin: 8px; display: inline-block; width: auto; min-width: 100px;
+      padding: 10px 20px; font-size: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .modal button:hover { transform: translateY(-1px); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
+    .modal button:active { transform: translateY(0); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .modal button.confirm-button { background-color: #28a745; color: white; }
+    .modal button.confirm-button:hover { background-color: #218838; }
+    .modal button.cancel-button { background-color: #dc3545; color: white; }
+    .modal button.cancel-button:hover { background-color: #c82333; }
+    .loading-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(255, 255, 255, 0.8);
+      display: flex; justify-content: center; align-items: center;
+      z-index: 99999;
+    }
+    .spinner {
+      border: 5px solid rgba(0, 0, 0, 0.1);
+      width: 40px; height: 40px; border-radius: 50%;
+      border-left-color: #3498db;
+      animation: spin 1s ease infinite;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    #notification {
+      display: none; position: fixed; top: 20px; left: 50%;
+      transform: translateX(-50%); background-color: #28a745;
+      color: white; padding: 15px 25px; border-radius: 8px;
+      z-index: 10000; text-align: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-weight: bold;
+    }
+    
+    .error { color: #e74c3c; font-size: 14px; text-align: center; margin-top: 5px; }
+    .footer { text-align: center; margin-top: 20px; color: #7f8c8d; font-size: 13px; }
+    .date-time { font-size: 14px; color: #555; }
+    .controls-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    .actions-group, .filters-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .pagination-controls {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        margin-top: 20px;
+        flex-wrap: wrap;
+    }
+
+    .pagination-controls button {
+        padding: 8px 15px;
+        margin: 0;
+        font-size: 14px;
+        border-radius: 5px;
+        background-color: #3498db;
+        color: white;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.2s ease, transform 0.1s ease;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .pagination-controls button:hover:not(:disabled) {
+        background-color: #2980b9;
+        transform: translateY(-1px);
+    }
+
+    .pagination-controls button:disabled {
+        background-color: #cccccc;
+        cursor: not-allowed;
+        box-shadow: none;
+    }
+
+    .pagination-controls span {
+        font-size: 15px;
+        font-weight: bold;
+        color: #2c3e50;
+    }
+
+    #activeExamsInfo {
+        margin-bottom: 20px;
+        padding: 15px;
+        background-color: #e8f5e9;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        color: #28a745;
+        font-size: 0.95em;
+    }
+
+    #activeExamsInfo p {
+        margin: 5px 0;
+        font-weight: 500;
+        line-height: 1.4;
+    }
+
+    #activeExamsInfo p strong {
+        color: #1b5e20;
+    }
+
+    .countdown-timer {
+        font-weight: bold;
+        color: #d32f2f;
+        font-family: monospace;
+    }
+
+    .force-active-indicator {
+        font-weight: bold;
+        color: #8e44ad;
+        margin-left: 5px;
+    }
+    
+    /* Mobile and Desktop view classes */
+    .mobile-only { display: none; }
+    .desktop-only { display: table-cell; }
+
+    @media (max-width: 768px) {
+      .main-content { padding: 15px; height: auto; min-height: 100vh; }
+      .container { padding: 15px; }
+      input, select, textarea { font-size: 14px; padding: 10px; }
+      button, .text-button { font-size: 14px; padding: 10px 15px; }
+      table { font-size: 12px; }
+      th, td { padding: 8px; }
+      .action-buttons-group { flex-wrap: wrap; justify-content: center; gap: 3px; }
+      .action-buttons-group .text-button { width: auto; padding: 6px 10px; font-size: 12px;}
+      
+      /* Mobile table layout adjustments */
+      .desktop-only { display: none; }
+      .mobile-only {
+          display: table-cell;
+          white-space: normal; /* Allow name to wrap */
+      }
+      #studentTableBody .mobile-only[data-type="class-name"] {
+          text-align: left;
+      }
+    }
+    @media (max-width: 480px) {
+      .controls-header { justify-content: center; }
+      .pagination-controls {
+          flex-direction: column;
+          gap: 5px;
+      }
+      .pagination-controls button {
+          width: 80%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="main-content" id="mainContent">
+    <div class="container" id="loginSection" style="max-width: 400px; margin: auto;">
+      <h3 style="text-align: center; color: #2c3e50;">LOGIN PENGAWAS</h3>
+      <p id="loginError" class="error"></p>
+      <input type="text" id="roomNumber" placeholder="Nomor Ruangan (contoh: 01)" />
+      <input type="password" id="password" placeholder="Password" />
+      <button onclick="window.loginSupervisor()">Login</button>
+      <div class="footer">
+        <div>@Pengawas SMPN 2 Pajangan</div>
+        <div id="currentTime" class="date-time"></div>
+      </div>
+    </div>
+
+    <div id="supervisorDashboardContent" style="display:none;">
+      <div id="studentSection" class="supervisor-section container">
+        <h1 id="studentSectionTitle" style="text-transform: uppercase; text-align: center; color: #34495e;">DAFTAR PESERTA RUANGAN <span id="displayRoomNumber"></span></h1>
+        
+        <div class="controls-header">
+            <div class="actions-group">
+                <button class="text-button red" onclick="window.promptLogoutSupervisor()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            </div>
+        </div>
+
+        <div id="activeExamsInfo" style="display: none;">
+            <h4>Ujian Aktif Saat Ini:</h4>
+        </div>
+
+        <p id="studentTableMessage" style="text-align: center; color: #555; font-style: italic; margin: 20px 0; display: none;">
+            Tidak ada siswa di ruangan ini atau tidak ada token ujian yang relevan.
+        </p>
+        <div class="table-responsive" id="studentTableContainer">
+          <table id="studentTable">
+            <thead>
+              <tr>
+                <th>NO</th>
+                <!-- Mobile View Headers -->
+                <th class="mobile-only">STATUS</th>
+                <th class="mobile-only">AKSI</th>
+                <th class="mobile-only">KELAS & NAMA</th>
+                <!-- Desktop View Headers -->
+                <th class="desktop-only">ID SISWA</th>
+                <th class="desktop-only">NAMA</th>
+                <th class="desktop-only">KELAS</th>
+                <th class="desktop-only">STATUS</th>
+                <th class="desktop-only">AKSI</th>
+              </tr>
+            </thead>
+            <tbody id="studentTableBody"></tbody>
+          </table>
+        </div>
+        <div id="studentPagination" class="pagination-controls"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="notification"><span id="notificationMessage"></span></div>
+  <div id="loadingOverlay" class="loading-overlay" style="display: none;"><div class="spinner"></div></div>
+  
+  <div id="logoutConfirmModal" class="modal">
+      <div class="modal-content">
+          <h4>Konfirmasi Logout</h4>
+          <p>Anda yakin ingin keluar dari panel pengawas?</p>
+          <button onclick="window.confirmLogoutSupervisor()" class="confirm-button">Ya, Keluar</button>
+          <button onclick="window.closeLogoutModalSupervisor()" class="cancel-button">Batal</button>
+      </div>
+  </div>
+
+  <div id="resetStudentModal" class="modal">
+    <div class="modal-content">
+        <h4>Reset Status Login Siswa</h4>
+        <p>Anda yakin ingin mereset status login siswa <b id="resetStudentNameDisplay"></b> (ID: <b id="resetStudentIdDisplay"></b>)?</p>
+        <p style="font-size: 0.9em; color: #555;">Ini akan memaksa siswa untuk login ulang jika mereka sedang dalam sesi.</p>
+        <button onclick="window.closeResetStudentModalSupervisor()" class="cancel-button">Batal</button>
+        <button onclick="window.confirmResetStudentSupervisor()" class="confirm-button">Reset</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
+    import { getDatabase, ref, onValue, update, remove } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-database.js";
+
+    const allFirebaseConfigs = {
+        '7ABC': { apiKey: "AIzaSyBJBl_HWsOsnBBI1EPs1yQlJd0Hso8HcSo", authDomain: "ujianpdf-7abc.firebaseapp.com", databaseURL: "https://ujianpdf-7abc-default-rtdb.firebaseio.com", projectId: "ujianpdf-7abc", storageBucket: "ujianpdf-7abc.appspot.com", messagingSenderId: "1035978389542", appId: "1:1035978389542:web:413eb32b04c0d09bc48ee7" },
+        '7DEF': { apiKey: "AIzaSyDQKdbwaG0Tg7_tfHs0hCbNR3xlqT3vWLA", authDomain: "ujianpdf-7def.firebaseapp.com", databaseURL: "https://ujianpdf-7def-default-rtdb.firebaseio.com", projectId: "ujianpdf-7def", storageBucket: "ujianpdf-7def.appspot.com", messagingSenderId: "210211262444", appId: "1:210211262444:web:a06a988913ede65369bac9" },
+        '8ABC': { apiKey: "AIzaSyAsbVn2qVIgH278ZjPfkMihlGYmyL8zJFA", authDomain: "ujianpdf8abc-3bedf.firebaseapp.com", databaseURL: "https://ujianpdf8abc-3bedf-default-rtdb.firebaseio.com", projectId: "ujianpdf8abc-3bedf", storageBucket: "ujianpdf8abc-3bedf.appspot.com", messagingSenderId: "408487358048", appId: "1:408487358048:web:10cc8796510f4b8ab99d05" },
+        '8DEF': { apiKey: "AIzaSyBvkIMTkJkDqe2nKspIMXOCeT9vc6h8xjA", authDomain: "ujianpdf8def-9bdcd.firebaseapp.com", databaseURL: "https://ujianpdf8def-9bdcd-default-rtdb.firebaseio.com", projectId: "ujianpdf8def-9bdcd", storageBucket: "ujianpdf8def-9bdcd.appspot.com", messagingSenderId: "69381651529", appId: "1:69381651529:web:af517e87735d2ad51a9398" },
+        '9ABC': { apiKey: "AIzaSyCjf42a3CCB3IuNto2K8MGpTX_SM1FXyrw", authDomain: "ujianpdf-9abc.firebaseapp.com", databaseURL: "https://ujianpdf-9abc-default-rtdb.firebaseio.com", projectId: "ujianpdf-9abc", storageBucket: "ujianpdf-9abc.appspot.com", messagingSenderId: "939178637981", appId: "1:939178637981:web:b9a15dfa72180d15d77274" },
+        '9DEF': { apiKey: "AIzaSyDK50Amn6N8gl_q6CVhDjV_DRPpdCpCTrw", authDomain: "ujianpdf-9def.firebaseapp.com", databaseURL: "https://ujianpdf-9def-default-rtdb.firebaseio.com", projectId: "ujianpdf-9def", storageBucket: "ujianpdf-9def.appspot.com", messagingSenderId: "450883192159", appId: "1:450883192159:web:6ad39c42db5756ff0f62ea" }
+    };
+    
+    const dbInstances = {};
+    for (const groupKey in allFirebaseConfigs) {
+        if (allFirebaseConfigs.hasOwnProperty(groupKey)) {
+            const config = allFirebaseConfigs[groupKey];
+            const appInstance = initializeApp(config, groupKey); 
+            dbInstances[groupKey] = getDatabase(appInstance);
+        }
+    }
+    
+    const gradeToDbGroupMap = {
+        '7': ['7ABC', '7DEF'],
+        '8': ['8ABC', '8DEF'],
+        '9': ['9ABC', '9DEF']
+    };
+
+    const rombelToDbMap = {
+        '7A': '7ABC', '7B': '7ABC', '7C': '7ABC', '7D': '7DEF', '7E': '7DEF', '7F': '7DEF',
+        '8A': '8ABC', '8B': '8ABC', '8C': '8ABC', '8D': '8DEF', '8E': '8DEF', '8F': '8DEF',
+        '9A': '9ABC', '9B': '9ABC', '9C': '9ABC', '9D': '9DEF', '9E': '9DEF', '9F': '9DEF'
+    };
+
+    const SUPERVISOR_PASS = "12345678";
+    const INACTIVITY_TIMEOUT = 60 * 60 * 1000;
+
+    let inactivityTimer;
+    let supervisorRoom = null;
+    let supervisorDbGroupNames = [];
+    let supervisorDbInstances = [];
+
+    let tokenCache = [];
+    let studentCache = [];
+    let tokenAccessStatus = {};
+    let submittedExamsCache = {};
+    let consolidatedTokensMap = new Map();
+    let countdownIntervals = {};
+
+    let studentKeyForAction = null;
+    let studentIdForAction = null;
+    let studentNameForAction = null;
+
+    let selectedItemsPerPage = 75;
+    let currentPageStudent = 1;
+    let filteredStudents = [];
+
+    const loginSection = document.getElementById('loginSection');
+    const supervisorDashboardContent = document.getElementById('supervisorDashboardContent');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const studentTableBody = document.getElementById('studentTableBody');
+    const studentTableContainer = document.getElementById('studentTableContainer');
+    const studentTableMessage = document.getElementById('studentTableMessage');
+    const activeExamsInfoDiv = document.getElementById('activeExamsInfo');
+    const studentPaginationDiv = document.getElementById('studentPagination');
+    const displayRoomNumber = document.getElementById('displayRoomNumber');
+
+    const padStudentId = (id) => String(id).padStart(3, '0');
+    const padRoomNumber = (room) => { if (!room) return '-'; const numRoom = parseInt(room, 10); return !isNaN(numRoom) ? String(numRoom).padStart(2, '0') : String(room).toUpperCase(); };
+    const getNumericClass = (classString) => String(classString || '').match(/^(\d+)/)?.[1] || null;
+    const escapeHtmlAttributeForJsString = (s) => String(s).replace(/&/g, '&amp;').replace(/'/g, '&#39;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    
+    window.showNotification = (message) => {
+        const n = document.getElementById('notification');
+        n.innerText = message;
+        n.style.display = 'block';
+        setTimeout(() => { n.style.display = 'none'; }, 3000);
+    };
+
+    window.updateTime = () => {
+        const now = new Date();
+        const options = { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
+        const display = now.toLocaleString('id-ID', options).replace(/\./g, ':');
+        document.getElementById("currentTime").innerText = display;
+    };
+    
+    window.resetInactivityTimer = () => {
+        clearTimeout(inactivityTimer);
+        inactivityTimer = setTimeout(() => {
+            if(localStorage.getItem('isSupervisorLoggedIn')) {
+                window.showNotification('Anda telah logout karena tidak ada aktivitas.');
+                window.confirmLogoutSupervisor();
+            }
+        }, INACTIVITY_TIMEOUT);
+    };
+
+    window.initializeAppState = async () => {
+        loginSection.style.display = 'none';
+        supervisorDashboardContent.style.display = 'flex';
+        document.body.style.display = 'flex';
+        document.body.style.flexDirection = 'column';
+        document.body.style.alignItems = 'flex-start';
+        document.body.style.justifyContent = 'flex-start';
+
+        displayRoomNumber.innerText = supervisorRoom;
+
+        supervisorDbInstances = supervisorDbGroupNames.map(dbName => dbInstances[dbName]).filter(Boolean);
+
+        if (supervisorDbInstances.length === 0) {
+            window.showNotification("Tidak ada konfigurasi database yang ditemukan untuk ruangan ini. Silakan hubungi admin.");
+            window.confirmLogoutSupervisor();
+            return;
+        }
+
+        await Promise.all([
+            loadStudentsForRoom(),
+            loadTokenAccessStatus(),
+            loadSubmittedExamsStatus(),
+            loadTokensForSupervisor()
+        ]);
+        
+        window.resetInactivityTimer();
+        setInterval(() => {
+            if (localStorage.getItem('isSupervisorLoggedIn')) {
+                window.periksaAndUpdateStatusToken();
+            }
+        }, 10000);
+    };
+    
+    window.loginSupervisor = async () => {
+        const room = document.getElementById("roomNumber").value.trim();
+        const p = document.getElementById("password").value.trim();
+        const loginError = document.getElementById("loginError");
+
+        loginError.innerText = "";
+
+        if (p !== SUPERVISOR_PASS) {
+            loginError.innerText = "Password salah.";
+            return;
+        }
+
+        if (!/^\d{2}$/.test(room)) {
+            loginError.innerText = "Nomor ruangan tidak valid (contoh: 01).";
+            return;
+        }
+
+        loadingOverlay.style.display = 'flex';
+
+        try {
+            const allStudentsAcrossDbs = [];
+            await Promise.all(Object.keys(dbInstances).map(dbName => {
+                return new Promise((resolve, reject) => {
+                    onValue(ref(dbInstances[dbName], 'students'), (snapshot) => {
+                        snapshot.forEach(child => {
+                            const data = child.val();
+                            data.key = child.key;
+                            data.firebaseGroup = dbName;
+                            allStudentsAcrossDbs.push(data);
+                        });
+                        resolve();
+                    }, (error) => {
+                        console.error(`Error loading students from ${dbName} for login inference:`, error);
+                        reject(error);
+                    }, { onlyOnce: true });
+                });
+            }));
+
+            const relevantDbGroupNames = new Set();
+            let foundStudentInRoom = false;
+            allStudentsAcrossDbs.forEach(student => {
+                if (padRoomNumber(student.room) === padRoomNumber(room)) {
+                    relevantDbGroupNames.add(student.firebaseGroup);
+                    foundStudentInRoom = true;
+                }
+            });
+
+            if (!foundStudentInRoom) {
+                loginError.innerText = "Tidak ada siswa yang terdaftar di ruangan ini.";
+                return;
+            }
+
+            if (relevantDbGroupNames.size === 0) {
+                loginError.innerText = "Tidak dapat menemukan database yang relevan untuk ruangan ini.";
+                return;
+            }
+
+            supervisorRoom = room;
+            supervisorDbGroupNames = Array.from(relevantDbGroupNames);
+            
+            localStorage.setItem('isSupervisorLoggedIn', 'true');
+            localStorage.setItem('supervisorRoom', supervisorRoom);
+            localStorage.setItem('supervisorDbGroupNames', JSON.stringify(supervisorDbGroupNames));
+
+            window.initializeAppState();
+
+        } catch (error) {
+            console.error("Login supervisor gagal:", error);
+            loginError.innerText = "Terjadi kesalahan saat login: " + error.message;
+        } finally {
+            loadingOverlay.style.display = 'none';
+        }
+    };
+
+    function attachEventListeners() {
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        window.updateTime();
+        ['mousemove', 'keypress', 'scroll', 'click'].forEach(evt => window.addEventListener(evt, window.resetInactivityTimer));
+
+        if (localStorage.getItem('isSupervisorLoggedIn') === 'true' && localStorage.getItem('supervisorRoom') && localStorage.getItem('supervisorDbGroupNames')) {
+            supervisorRoom = localStorage.getItem('supervisorRoom');
+            supervisorDbGroupNames = JSON.parse(localStorage.getItem('supervisorDbGroupNames'));
+            
+            if (supervisorDbGroupNames.length > 0) {
+                window.initializeAppState();
+            } else {
+                console.error("No supervisor DB group names found in localStorage.");
+                localStorage.removeItem('isSupervisorLoggedIn');
+                localStorage.removeItem('supervisorRoom');
+                localStorage.removeItem('supervisorDbGroupNames');
+                loginSection.style.display = 'block';
+                supervisorDashboardContent.style.display = 'none';
+            }
+        } else {
+            loginSection.style.display = 'block';
+            supervisorDashboardContent.style.display = 'none';
+        }
+        attachEventListeners();
+    });
+
+    async function loadStudentsForRoom() {
+        studentCache = [];
+        const promises = supervisorDbInstances.map(db => {
+            return new Promise((resolve, reject) => {
+                onValue(ref(db, 'students'), (snapshot) => {
+                    const studentsInGroup = [];
+                    snapshot.forEach(child => {
+                        const data = child.val();
+                        data.key = child.key;
+                        data.firebaseGroup = db.app.name;
+                        if (padRoomNumber(data.room) === padRoomNumber(supervisorRoom)) {
+                            studentsInGroup.push(data);
+                        }
+                    });
+                    studentCache = studentCache.filter(s => s.firebaseGroup !== db.app.name).concat(studentsInGroup);
+                    
+                    studentCache.sort((a, b) => {
+                        const classA = parseInt(getNumericClass(a.class) || '0');
+                        const classB = parseInt(getNumericClass(b.class) || '0');
+                        if (classA !== classB) return classA - classB;
+
+                        const nameA = String(a.name || '').toUpperCase();
+                        const nameB = String(b.name || '').toUpperCase();
+                        return nameA.localeCompare(nameB);
+                    });
+
+                    window.renderStudentTableSupervisorWithCurrentState(currentPageStudent);
+                    resolve();
+                }, (error) => {
+                    console.error(`Error memuat siswa dari grup ${db.app.name}:`, error);
+                    reject(error);
+                });
+            });
+        });
+        await Promise.all(promises);
+    }
+
+    async function loadTokensForSupervisor() {
+        tokenCache = [];
+        consolidatedTokensMap.clear();
+
+        const promises = supervisorDbInstances.map(db => {
+            return new Promise((resolve, reject) => {
+                onValue(ref(db, 'tokens'), (snapshot) => {
+                    const groupTokens = [];
+                    snapshot.forEach(child => {
+                        const data = child.val();
+                        data.key = child.key;
+                        data.firebaseGrade = getNumericClass(data.kelas);
+                        data.firebaseGroup = db.app.name;
+                        groupTokens.push(data);
+                    });
+                    tokenCache = tokenCache.filter(t => t.firebaseGroup !== db.app.name).concat(groupTokens);
+                    
+                    consolidatedTokensMap.clear();
+                    tokenCache.forEach(tokenData => {
+                        const consolidatedKey = `${tokenData.token}_${tokenData.kelas}`;
+                        if (!consolidatedTokensMap.has(consolidatedKey)) {
+                            consolidatedTokensMap.set(consolidatedKey, { ...tokenData, firebaseKeys: new Set([tokenData.key]), firebaseGroups: new Set([tokenData.firebaseGroup]) });
+                        } else {
+                            const existing = consolidatedTokensMap.get(consolidatedKey);
+                            existing.firebaseKeys.add(tokenData.key);
+                            existing.firebaseGroups.add(tokenData.firebaseGroup);
+                            existing.isForceActive = existing.isForceActive || tokenData.isForceActive;
+                            existing.isActive = existing.isActive || tokenData.isActive;
+                        }
+                    });
+
+                    window.renderActiveExamsInfo();
+                    window.periksaAndUpdateStatusToken();
+                    window.renderStudentTableSupervisorWithCurrentState(currentPageStudent);
+                    resolve();
+                }, (error) => {
+                    console.error(`Error memuat token dari grup ${db.app.name}:`, error);
+                    reject(error);
+                });
+            });
+        });
+        await Promise.all(promises);
+    }
+
+    async function loadTokenAccessStatus() {
+        tokenAccessStatus = {};
+        const promises = supervisorDbInstances.map(db => {
+            return new Promise((resolve, reject) => {
+                onValue(ref(db, 'exam_access_status'), (snapshot) => {
+                    Object.assign(tokenAccessStatus, snapshot.val() || {});
+                    window.renderStudentTableSupervisorWithCurrentState(currentPageStudent);
+                    resolve();
+                }, (error) => {
+                    console.error(`Error memuat status akses ujian dari grup ${db.app.name}:`, error);
+                    reject(error);
+                });
+            });
+        });
+        await Promise.all(promises);
+    }
+
+    async function loadSubmittedExamsStatus() {
+        submittedExamsCache = {};
+        const promises = supervisorDbInstances.map(db => {
+            return new Promise((resolve, reject) => {
+                onValue(ref(db, 'submitted_exams'), (snapshot) => {
+                    Object.assign(submittedExamsCache, snapshot.val() || {});
+                    window.renderStudentTableSupervisorWithCurrentState(currentPageStudent);
+                    resolve();
+                }, (error) => {
+                    console.error(`Error memuat status submit ujian dari grup ${db.app.name}:`, error);
+                    reject(error);
+                });
+            });
+        });
+        await Promise.all(promises);
+    }
+
+    window.periksaAndUpdateStatusToken = () => {
+        const now = new Date();
+        tokenCache.forEach(tokenData => {
+            const newIsActive = tokenData.isForceActive ? true : (now >= new Date(tokenData.startTime) && now < new Date(tokenData.endTime));
+            const targetDb = supervisorDbInstances.find(db => db.app.name === tokenData.firebaseGroup);
+            if (targetDb && tokenData.isActive !== newIsActive) {
+                update(ref(targetDb, `tokens/${tokenData.key}`), { isActive: newIsActive })
+                    .catch(e => console.error(`Error mengupdate status token ${tokenData.key}:`, e));
+            }
+        });
+        window.renderActiveExamsInfo();
+    };
+
+    window.renderActiveExamsInfo = () => {
+        activeExamsInfoDiv.innerHTML = '<h4>Ujian Aktif Saat Ini:</h4>';
+        const activeConsolidatedTokens = Array.from(consolidatedTokensMap.values()).filter(t => t.isActive || t.isForceActive);
+
+        Object.values(countdownIntervals).forEach(clearInterval);
+        countdownIntervals = {};
+
+        if (activeConsolidatedTokens.length === 0) {
+            activeExamsInfoDiv.style.display = 'none';
+            return;
+        }
+
+        activeExamsInfoDiv.style.display = 'block';
+        activeConsolidatedTokens.sort((a, b) => {
+            const classA = parseInt(getNumericClass(a.kelas) || '0');
+            const classB = parseInt(getNumericClass(b.kelas) || '0');
+            if (classA !== classB) return classA - classB;
+            return a.subject.localeCompare(b.subject);
+        }).forEach(token => {
+            const p = document.createElement('p');
+            let forceActiveIndicator = token.isForceActive ? '<span class="force-active-indicator">(PAKSA AKTIF)</span>' : '';
+            // Removed duration display
+            p.innerHTML = `<strong>Kelas ${token.kelas} - ${token.subject.toUpperCase()}</strong>: Token <strong>${token.token}</strong> ${forceActiveIndicator}`;
+            
+            const countdownSpan = document.createElement('span');
+            countdownSpan.className = 'countdown-timer';
+            p.appendChild(countdownSpan);
+
+            activeExamsInfoDiv.appendChild(p);
+
+            const endTime = new Date(token.endTime).getTime();
+            countdownIntervals[token.key] = setInterval(() => {
+                const now = new Date().getTime();
+                const distance = endTime - now;
+
+                if (distance < 0) {
+                    clearInterval(countdownIntervals[token.key]);
+                    countdownSpan.innerText = ' (WAKTU HABIS)';
+                    window.renderStudentTableSupervisorWithCurrentState(currentPageStudent);
+                    return;
+                }
+
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                countdownSpan.innerText = ` (Sisa Waktu: ${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')})`;
+            }, 1000);
+        });
+    };
+
+    function initializeStudentSectionViewSupervisor() {
+        const activeTokens = Array.from(consolidatedTokensMap.values()).filter(t => t.isActive || t.isForceActive);
+        
+        let tokenKeysForDisplay = [];
+        if (activeTokens.length > 0) {
+            tokenKeysForDisplay = activeTokens.flatMap(t => Array.from(t.firebaseKeys));
+        } else {
+            tokenKeysForDisplay = Array.from(consolidatedTokensMap.values()).flatMap(t => Array.from(t.firebaseKeys));
+        }
+        window.renderStudentTableSupervisor(tokenKeysForDisplay, 1);
+        window.renderActiveExamsInfo();
+    }
+    
+    window.renderStudentTableSupervisor = (tokenKeys, page = 1) => {
+        currentPageStudent = page;
+
+        let studentsToDisplay = [...studentCache];
+
+        const studentStatuses = new Map();
+        studentsToDisplay.forEach(student => {
+            let status = 'Belum Login';
+            let relevantExamFound = false;
+
+            for (const tokenKey of tokenKeys) {
+                const tokenData = tokenCache.find(t => t.key === tokenKey);
+                if (tokenData && getNumericClass(tokenData.kelas) === getNumericClass(student.class)) {
+                    relevantExamFound = true;
+                    const accessData = tokenAccessStatus[tokenKey]?.[student.id];
+                    const submissionData = submittedExamsCache[tokenKey]?.[student.id];
+
+                    if (submissionData?.isSubmitted) {
+                        status = 'Sudah submit';
+                        break;
+                    } else if (accessData?.isLoggedIn) {
+                        status = 'Sedang mengerjakan';
+                    } else if (accessData?.accessCount > 0 && status !== 'Sedang mengerjakan') {
+                        status = 'Belum login (reset)';
+                    }
+                }
+            }
+            if (!relevantExamFound) {
+                status = '-';
+            }
+            studentStatuses.set(student.key, status);
+        });
+
+        if (studentsToDisplay.length === 0) {
+            studentTableMessage.style.display = 'block';
+            studentTableContainer.style.display = 'none';
+            studentPaginationDiv.style.display = 'none';
+            studentTableBody.innerHTML = '';
+            return;
+        } else {
+            studentTableMessage.style.display = 'none';
+            studentTableContainer.style.display = 'block';
+            studentPaginationDiv.style.display = 'flex';
+        }
+
+        studentsToDisplay.sort((a, b) => {
+            const classA = parseInt(getNumericClass(a.class) || '0');
+            const classB = parseInt(getNumericClass(b.class) || '0');
+            if (classA !== classB) return classA - classB;
+
+            const nameA = String(a.name || '').toUpperCase();
+            const nameB = String(b.name || '').toUpperCase();
+            return nameA.localeCompare(nameB);
+        });
+        
+        filteredStudents = studentsToDisplay;
+        const totalPages = Math.ceil(filteredStudents.length / selectedItemsPerPage);
+        const startIndex = (currentPageStudent - 1) * selectedItemsPerPage;
+        const endIndex = startIndex + selectedItemsPerPage;
+        const studentsForPage = filteredStudents.slice(startIndex, endIndex);
+
+        studentTableBody.innerHTML = '';
+        studentsForPage.forEach((student, index) => {
+            const row = document.createElement('tr');
+            const finalStatus = studentStatuses.get(student.key) || '(-)';
+            let statusColor = 'black';
+            switch(finalStatus) {
+                case 'Sudah submit': statusColor = '#27ae60'; break;
+                case 'Sedang mengerjakan': statusColor = '#f39c12'; break;
+                case 'Belum login (reset)': statusColor = '#8e44ad'; break;
+                case 'Belum login': statusColor = '#e74c3c'; break;
+                case '-': statusColor = '#7f8c8d'; break;
+            }
+
+            let resetButtonHtml = '';
+            if (finalStatus === 'Sedang mengerjakan') {
+                resetButtonHtml = `<button class="text-button blue-gray" onclick="window.promptResetStudentSupervisor('${escapeHtmlAttributeForJsString(student.key)}', '${escapeHtmlAttributeForJsString(student.id)}', '${escapeHtmlAttributeForJsString(student.name)}', '${escapeHtmlAttributeForJsString(student.class)}')" title="Reset Status Login">Reset</button>`;
+            }
+
+            row.innerHTML = `
+                <td>${startIndex + index + 1}</td>
+                <!-- Mobile View Cells -->
+                <td class="mobile-only" style="color: ${statusColor}; font-weight: bold; text-align: center;">${finalStatus}</td>
+                <td class="mobile-only"><div class="action-buttons-group">${resetButtonHtml}</div></td>
+                <td class="mobile-only" data-type="class-name" style="text-align: left;">${escapeHtmlAttributeForJsString(student.class)} | ${escapeHtmlAttributeForJsString(student.name)}</td>
+                <!-- Desktop View Cells -->
+                <td class="desktop-only">${escapeHtmlAttributeForJsString(student.id)}</td>
+                <td class="desktop-only">${escapeHtmlAttributeForJsString(student.name)}</td>
+                <td class="desktop-only">${escapeHtmlAttributeForJsString(student.class)}</td>
+                <td class="desktop-only" style="color: ${statusColor}; font-weight: bold; text-align: center;">${finalStatus}</td>
+                <td class="desktop-only"><div class="action-buttons-group">${resetButtonHtml}</div></td>
+            `;
+            studentTableBody.appendChild(row);
+        });
+        renderPaginationControls(studentPaginationDiv, currentPageStudent, totalPages, 'renderStudentTableSupervisorWithCurrentState');
+    };
+
+    window.renderStudentTableSupervisorWithCurrentState = (page) => {
+        const activeTokens = Array.from(consolidatedTokensMap.values()).filter(t => t.isActive || t.isForceActive);
+        let tokenKeysForDisplay = [];
+        if (activeTokens.length > 0) {
+            tokenKeysForDisplay = activeTokens.flatMap(t => Array.from(t.firebaseKeys));
+        } else {
+            tokenKeysForDisplay = Array.from(consolidatedTokensMap.values()).flatMap(t => Array.from(t.firebaseKeys));
+        }
+        window.renderStudentTableSupervisor(tokenKeysForDisplay, page);
+    };
+
+    function renderPaginationControls(container, currentPage, totalPages, renderFunction) {
+        container.innerHTML = '';
+        if (totalPages <= 1) return;
+        const prevButton = document.createElement('button');
+        prevButton.innerText = 'Sebelumnya';
+        prevButton.disabled = currentPage === 1;
+        prevButton.onclick = () => window[renderFunction](currentPage - 1);
+        container.appendChild(prevButton);
+        const pageSpan = document.createElement('span');
+        pageSpan.innerText = `Halaman ${currentPage} dari ${totalPages}`;
+        container.appendChild(pageSpan);
+        const nextButton = document.createElement('button');
+        nextButton.innerText = 'Berikutnya';
+        nextButton.disabled = currentPage === totalPages;
+        nextButton.onclick = () => window[renderFunction](currentPage + 1);
+        container.appendChild(nextButton);
+    }
+
+    window.promptResetStudentSupervisor = (key, id, name, studentClass) => {
+        studentKeyForAction = key;
+        studentIdForAction = id;
+        studentNameForAction = name;
+        document.getElementById('resetStudentNameDisplay').innerText = name;
+        document.getElementById('resetStudentIdDisplay').innerText = id;
+        document.getElementById('resetStudentModal').style.display = 'flex';
+    };
+
+    window.confirmResetStudentSupervisor = async () => {
+        if (!studentIdForAction || supervisorDbInstances.length === 0) return;
+
+        loadingOverlay.style.display = 'flex';
+        try {
+            const updates = {};
+            const studentToReset = studentCache.find(s => s.key === studentKeyForAction);
+            if (!studentToReset) {
+                window.showNotification("Siswa tidak ditemukan.");
+                return;
+            }
+
+            const targetDb = supervisorDbInstances.find(db => db.app.name === rombelToDbMap[studentToReset.class]);
+            if (!targetDb) {
+                window.showNotification("Gagal: Database untuk kelas siswa tidak ditemukan.");
+                return;
+            }
+
+            updates[`students/${studentKeyForAction}/isLoggedIn`] = false;
+
+            const relevantTokens = tokenCache.filter(token =>
+                getNumericClass(token.kelas) === getNumericClass(studentToReset.class) && token.firebaseGroup === targetDb.app.name
+            );
+
+            for (const token of relevantTokens) {
+                updates[`exam_access_status/${token.key}/${studentIdForAction}/isLoggedIn`] = null;
+            }
+
+            await update(ref(targetDb, '/'), updates);
+            window.showNotification(`Status login siswa ${studentIdForAction} berhasil direset.`);
+        } catch (error) {
+            window.showNotification("Gagal mereset status login: " + error.message);
+        } finally {
+            loadingOverlay.style.display = 'none';
+            window.closeResetStudentModalSupervisor();
+        }
+    };
+    
+    window.onclick = (event) => {
+        if (event.target.classList.contains('modal')) {
+            event.target.style.display = 'none';
+        }
+    };
+    window.closeResetStudentModalSupervisor = () => { document.getElementById('resetStudentModal').style.display = 'none'; studentKeyForAction = null; };
+    window.promptLogoutSupervisor = () => document.getElementById('logoutConfirmModal').style.display = 'flex';
+    window.closeLogoutModalSupervisor = () => document.getElementById('logoutConfirmModal').style.display = 'none';
+    window.confirmLogoutSupervisor = () => { localStorage.removeItem('isSupervisorLoggedIn'); localStorage.removeItem('supervisorRoom'); localStorage.removeItem('supervisorDbGroupNames'); location.reload(); };
+
+  </script>
+</body>
+</html>
