@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>Panel Pengawas Ujian</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=0.80" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
   <style>
     body {
@@ -123,7 +123,28 @@
         white-space: nowrap;
     }
     
-    #studentTableBody td:nth-child(1), #studentTableBody td:nth-child(2), #studentTableBody td:nth-child(4), #studentTableBody td:nth-child(5), #studentTableBody td:nth-child(6), #studentTableBody td:last-child { text-align: center; }
+    /* PENGATURAN PERATAAN KOLOM */
+    /* nth-child(1) = No
+       nth-child(2) = Mobile Status
+       nth-child(4) = Mobile Class|Name
+       nth-child(5) = Desktop ID
+       nth-child(7) = Desktop Class (UBAH JADI CENTER)
+       last-child   = Desktop Aksi
+    */
+    #studentTableBody td:nth-child(1), 
+    #studentTableBody td:nth-child(2), 
+    #studentTableBody td:nth-child(4), 
+    #studentTableBody td:nth-child(5), 
+    #studentTableBody td:nth-child(7), 
+    #studentTableBody td:last-child { 
+        text-align: center; 
+    }
+
+    /* nth-child(6) = Desktop Name (UBAH JADI RATA KIRI) */
+    #studentTableBody td:nth-child(6) {
+        text-align: left;
+    }
+
     .action-buttons-group { display: flex; justify-content: center; gap: 5px; flex-wrap: nowrap; flex-shrink: 0; }
     
     .modal {
@@ -378,38 +399,99 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
     import { getDatabase, ref, onValue, update, remove } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-database.js";
+    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-auth.js";
 
+    // Konfigurasi Firebase dari file ujian terbaru (Diperbarui)
     const allFirebaseConfigs = {
-        '7ABC': { apiKey: "AIzaSyBJBl_HWsOsnBBI1EPs1yQlJd0Hso8HcSo", authDomain: "ujianpdf-7abc.firebaseapp.com", databaseURL: "https://ujianpdf-7abc-default-rtdb.firebaseio.com", projectId: "ujianpdf-7abc", storageBucket: "ujianpdf-7abc.appspot.com", messagingSenderId: "1035978389542", appId: "1:1035978389542:web:413eb32b04c0d09bc48ee7" },
-        '7DEF': { apiKey: "AIzaSyDQKdbwaG0Tg7_tfHs0hCbNR3xlqT3vWLA", authDomain: "ujianpdf-7def.firebaseapp.com", databaseURL: "https://ujianpdf-7def-default-rtdb.firebaseio.com", projectId: "ujianpdf-7def", storageBucket: "ujianpdf-7def.appspot.com", messagingSenderId: "210211262444", appId: "1:210211262444:web:a06a988913ede65369bac9" },
-        '8ABC': { apiKey: "AIzaSyAsbVn2qVIgH278ZjPfkMihlGYmyL8zJFA", authDomain: "ujianpdf8abc-3bedf.firebaseapp.com", databaseURL: "https://ujianpdf8abc-3bedf-default-rtdb.firebaseio.com", projectId: "ujianpdf8abc-3bedf", storageBucket: "ujianpdf8abc-3bedf.appspot.com", messagingSenderId: "408487358048", appId: "1:408487358048:web:10cc8796510f4b8ab99d05" },
-        '8DEF': { apiKey: "AIzaSyBvkIMTkJkDqe2nKspIMXOCeT9vc6h8xjA", authDomain: "ujianpdf8def-9bdcd.firebaseapp.com", databaseURL: "https://ujianpdf8def-9bdcd-default-rtdb.firebaseio.com", projectId: "ujianpdf8def-9bdcd", storageBucket: "ujianpdf8def-9bdcd.appspot.com", messagingSenderId: "69381651529", appId: "1:69381651529:web:af517e87735d2ad51a9398" },
-        '9ABC': { apiKey: "AIzaSyCjf42a3CCB3IuNto2K8MGpTX_SM1FXyrw", authDomain: "ujianpdf-9abc.firebaseapp.com", databaseURL: "https://ujianpdf-9abc-default-rtdb.firebaseio.com", projectId: "ujianpdf-9abc", storageBucket: "ujianpdf-9abc.appspot.com", messagingSenderId: "939178637981", appId: "1:939178637981:web:b9a15dfa72180d15d77274" },
-        '9DEF': { apiKey: "AIzaSyDK50Amn6N8gl_q6CVhDjV_DRPpdCpCTrw", authDomain: "ujianpdf-9def.firebaseapp.com", databaseURL: "https://ujianpdf-9def-default-rtdb.firebaseio.com", projectId: "ujianpdf-9def", storageBucket: "ujianpdf-9def.appspot.com", messagingSenderId: "450883192159", appId: "1:450883192159:web:6ad39c42db5756ff0f62ea" }
+        'kelas7-group1': { /* 7ABC */
+            apiKey: "AIzaSyBAKwT7JY_HGnvK6h3u30-dfgRPXfef8l8",
+            authDomain: "abc-a13ea.firebaseapp.com",
+            databaseURL: "https://abc-a13ea-default-rtdb.firebaseio.com",
+            projectId: "abc-a13ea",
+            storageBucket: "abc-a13ea.firebasestorage.app",
+            messagingSenderId: "1052966795599",
+            appId: "1:1052966795599:web:d4d331199ca9081321ed3a"
+        },
+        'kelas7-group2': { /* 7DEF */
+            apiKey: "AIzaSyBkhBZw3oADXUAJ9FXY9-g7XBsSmQhzZVk",
+            authDomain: "def-ab5ee.firebaseapp.com",
+            databaseURL: "https://def-ab5ee-default-rtdb.firebaseio.com",
+            projectId: "def-ab5ee",
+            storageBucket: "def-ab5ee.firebasestorage.app",
+            messagingSenderId: "129712840107",
+            appId: "1:129712840107:web:ab10576fed95f735dd46ee"
+        },
+        'kelas8-group1': { /* 8ABC */
+            apiKey: "AIzaSyAwilwwwEJ2MAdSf09BotxNH-z6RiXaHXY",
+            authDomain: "abc-43e73.firebaseapp.com",
+            databaseURL: "https://abc-43e73-default-rtdb.firebaseio.com",
+            projectId: "abc-43e73",
+            storageBucket: "abc-43e73.firebasestorage.app",
+            messagingSenderId: "1043754727577",
+            appId: "1:1043754727577:web:56c3732bf2a6ac900c2008"
+        },
+        'kelas8-group2': { /* 8DEF */
+            apiKey: "AIzaSyBeCI57lmZ4-8DAKYJ7nvYjnXOfvy0vqrk",
+            authDomain: "def-efcb2.firebaseapp.com",
+            databaseURL: "https://def-efcb2-default-rtdb.firebaseio.com",
+            projectId: "def-efcb2",
+            storageBucket: "def-efcb2.firebasestorage.app",
+            messagingSenderId: "12569956361",
+            appId: "1:12569956361:web:fea36c4e034e65f33ba8d8"
+        },
+        'kelas9-group1': { /* 9ABC */
+            apiKey: "AIzaSyBZ6JR3ggnUiZFQ-wdrewbfhzMUwFaGGzQ",
+            authDomain: "abc-d272a.firebaseapp.com",
+            databaseURL: "https://abc-d272a-default-rtdb.firebaseio.com",
+            projectId: "abc-d272a",
+            storageBucket: "abc-d272a.firebasestorage.app",
+            messagingSenderId: "1036605132828",
+            appId: "1:1036605132828:web:2b59f91290d50afe304fd9"
+        },
+        'kelas9-group2': { /* 9DEF */
+            apiKey: "AIzaSyC2iwuDMWTaJIG8g464Wt0En3CXI2DZiz4",
+            authDomain: "def-85f32.firebaseapp.com",
+            databaseURL: "https://def-85f32-default-rtdb.firebaseio.com",
+            projectId: "def-85f32",
+            storageBucket: "def-85f32.firebasestorage.app",
+            messagingSenderId: "82670626048",
+            appId: "1:82670626048:web:f5fdfda8fe078245b6bfe5"
+        }
     };
     
+    // Kredensial Global (dari web siswa)
+    const GLOBAL_USER_EMAIL = "speropa@gmail.com";
+    const GLOBAL_USER_PASS = "Pajangan201184*";
+    
     const dbInstances = {};
+    const authInstances = {};
+
     for (const groupKey in allFirebaseConfigs) {
         if (allFirebaseConfigs.hasOwnProperty(groupKey)) {
             const config = allFirebaseConfigs[groupKey];
             const appInstance = initializeApp(config, groupKey); 
             dbInstances[groupKey] = getDatabase(appInstance);
+            authInstances[groupKey] = getAuth(appInstance);
         }
     }
     
+    // Update Mapping agar sesuai dengan key baru
     const gradeToDbGroupMap = {
-        '7': ['7ABC', '7DEF'],
-        '8': ['8ABC', '8DEF'],
-        '9': ['9ABC', '9DEF']
+        '7': ['kelas7-group1', 'kelas7-group2'],
+        '8': ['kelas8-group1', 'kelas8-group2'],
+        '9': ['kelas9-group1', 'kelas9-group2']
     };
 
     const rombelToDbMap = {
-        '7A': '7ABC', '7B': '7ABC', '7C': '7ABC', '7D': '7DEF', '7E': '7DEF', '7F': '7DEF',
-        '8A': '8ABC', '8B': '8ABC', '8C': '8ABC', '8D': '8DEF', '8E': '8DEF', '8F': '8DEF',
-        '9A': '9ABC', '9B': '9ABC', '9C': '9ABC', '9D': '9DEF', '9E': '9DEF', '9F': '9DEF'
+        '7A': 'kelas7-group1', '7B': 'kelas7-group1', '7C': 'kelas7-group1', 
+        '7D': 'kelas7-group2', '7E': 'kelas7-group2', '7F': 'kelas7-group2',
+        '8A': 'kelas8-group1', '8B': 'kelas8-group1', '8C': 'kelas8-group1', 
+        '8D': 'kelas8-group2', '8E': 'kelas8-group2', '8F': 'kelas8-group2',
+        '9A': 'kelas9-group1', '9B': 'kelas9-group1', '9C': 'kelas9-group1', 
+        '9D': 'kelas9-group2', '9E': 'kelas9-group2', '9F': 'kelas9-group2'
     };
 
-    const SUPERVISOR_PASS = "12345678";
+    const SUPERVISOR_PASS = "12345";
     const INACTIVITY_TIMEOUT = 60 * 60 * 1000;
 
     let inactivityTimer;
@@ -488,6 +570,15 @@
             window.confirmLogoutSupervisor();
             return;
         }
+        
+        // Ensure auth for selected instances before loading data
+        // REPLACE signInAnonymously with signInWithEmailAndPassword
+        await Promise.all(supervisorDbInstances.map(async (db) => {
+            const auth = authInstances[db.app.name];
+            if(auth && !auth.currentUser) {
+                await signInWithEmailAndPassword(auth, GLOBAL_USER_EMAIL, GLOBAL_USER_PASS);
+            }
+        }));
 
         await Promise.all([
             loadStudentsForRoom(),
@@ -524,6 +615,14 @@
         loadingOverlay.style.display = 'flex';
 
         try {
+            // AUTHENTICATE ALL APPS BEFORE QUERYING
+            // Because rules require auth != null to read
+            // REPLACE signInAnonymously with signInWithEmailAndPassword
+            await Promise.all(Object.values(authInstances).map(auth => {
+                if (!auth.currentUser) return signInWithEmailAndPassword(auth, GLOBAL_USER_EMAIL, GLOBAL_USER_PASS);
+                return Promise.resolve();
+            }));
+
             const allStudentsAcrossDbs = [];
             await Promise.all(Object.keys(dbInstances).map(dbName => {
                 return new Promise((resolve, reject) => {
@@ -579,6 +678,18 @@
     };
 
     function attachEventListeners() {
+        const roomInput = document.getElementById('roomNumber');
+        const passwordInput = document.getElementById('password');
+
+        const handleEnter = (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                window.loginSupervisor();
+            }
+        };
+
+        if (roomInput) roomInput.addEventListener('keydown', handleEnter);
+        if (passwordInput) passwordInput.addEventListener('keydown', handleEnter);
     }
 
     document.addEventListener('DOMContentLoaded', async () => {
@@ -867,7 +978,7 @@
                 case 'Sudah submit': statusColor = '#27ae60'; break;
                 case 'Sedang mengerjakan': statusColor = '#f39c12'; break;
                 case 'Belum login (reset)': statusColor = '#8e44ad'; break;
-                case 'Belum login': statusColor = '#e74c3c'; break;
+                case 'Belum Login': statusColor = '#e74c3c'; break; // Perbaikan: Sesuaikan case dengan status default
                 case '-': statusColor = '#7f8c8d'; break;
             }
 
@@ -950,18 +1061,41 @@
                 return;
             }
 
-            updates[`students/${studentKeyForAction}/isLoggedIn`] = false;
+            // UPDATE: Tidak lagi mengubah node 'students' karena itu data master siswa
+            // HANYA mengubah exam_access_status untuk token yang relevan
 
             const relevantTokens = tokenCache.filter(token =>
-                getNumericClass(token.kelas) === getNumericClass(studentToReset.class) && token.firebaseGroup === targetDb.app.name
+                getNumericClass(token.kelas) === getNumericClass(studentToReset.class) &&
+                token.firebaseGroup === targetDb.app.name &&
+                (token.isActive || token.isForceActive)
             );
 
-            for (const token of relevantTokens) {
-                updates[`exam_access_status/${token.key}/${studentIdForAction}/isLoggedIn`] = null;
+            // Fallback jika tidak ada token aktif tapi statusnya 'sedang mengerjakan' (kemungkinan token baru saja nonaktif)
+            if (relevantTokens.length === 0) {
+                 const allClassTokens = tokenCache.filter(token =>
+                    getNumericClass(token.kelas) === getNumericClass(studentToReset.class) && 
+                    token.firebaseGroup === targetDb.app.name
+                 );
+                 // Cari token dimana siswa tercatat sedang login
+                 for (const token of allClassTokens) {
+                    if (tokenAccessStatus[token.key]?.[studentIdForAction]?.isLoggedIn) {
+                        relevantTokens.push(token);
+                    }
+                 }
             }
 
-            await update(ref(targetDb, '/'), updates);
-            window.showNotification(`Status login siswa ${studentIdForAction} berhasil direset.`);
+            for (const token of relevantTokens) {
+                // UPDATE: Mengubah menjadi false (bukan null) agar konsisten dengan Admin Panel
+                updates[`exam_access_status/${token.key}/${studentIdForAction}/isLoggedIn`] = false;
+            }
+
+            if (Object.keys(updates).length > 0) {
+                await update(ref(targetDb, '/'), updates);
+                window.showNotification(`Status login siswa ${studentIdForAction} berhasil direset.`);
+            } else {
+                window.showNotification(`Tidak ada sesi aktif yang ditemukan untuk direset.`);
+            }
+            
         } catch (error) {
             window.showNotification("Gagal mereset status login: " + error.message);
         } finally {
