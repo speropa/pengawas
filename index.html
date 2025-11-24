@@ -50,6 +50,35 @@
       box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
       outline: none;
     }
+    
+    /* Style khusus untuk wrapper password agar ikon mata bisa diposisikan */
+    .password-wrapper {
+        position: relative;
+        width: 100%;
+    }
+    .password-wrapper input {
+        padding-right: 40px; /* Beri ruang untuk ikon mata */
+    }
+    .toggle-password {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #7f8c8d;
+        font-size: 1.2em;
+        z-index: 2;
+    }
+    .toggle-password:hover {
+        color: #34495e;
+    }
+    .login-logo {
+        display: block;
+        margin: 0 auto 15px auto;
+        width: 80px;
+        height: auto;
+    }
+
     button {
       padding: 12px 25px; margin: 10px auto;
       display: block; font-size: 16px; cursor: pointer;
@@ -124,13 +153,6 @@
     }
     
     /* PENGATURAN PERATAAN KOLOM */
-    /* nth-child(1) = No
-       nth-child(2) = Mobile Status
-       nth-child(4) = Mobile Class|Name
-       nth-child(5) = Desktop ID
-       nth-child(7) = Desktop Class (UBAH JADI CENTER)
-       last-child   = Desktop Aksi
-    */
     #studentTableBody td:nth-child(1), 
     #studentTableBody td:nth-child(2), 
     #studentTableBody td:nth-child(4), 
@@ -140,7 +162,7 @@
         text-align: center; 
     }
 
-    /* nth-child(6) = Desktop Name (UBAH JADI RATA KIRI) */
+    /* nth-child(6) = Desktop Name (RATA KIRI) */
     #studentTableBody td:nth-child(6) {
         text-align: left;
     }
@@ -321,10 +343,19 @@
 <body>
   <div class="main-content" id="mainContent">
     <div class="container" id="loginSection" style="max-width: 400px; margin: auto;">
+      <!-- Logo ditambahkan di sini -->
+      <img src="https://raw.githubusercontent.com/smp2pajangan/gambar/refs/heads/main/logosmpn2pjg.png" alt="Logo" class="login-logo">
+      
       <h3 style="text-align: center; color: #2c3e50;">LOGIN PENGAWAS</h3>
       <p id="loginError" class="error"></p>
       <input type="text" id="roomNumber" placeholder="Nomor Ruangan (contoh: 01)" />
-      <input type="password" id="password" placeholder="Password" />
+      
+      <!-- Wrapper untuk password dan ikon mata -->
+      <div class="password-wrapper">
+          <input type="password" id="password" placeholder="Password" />
+          <i class="fas fa-eye toggle-password" id="togglePasswordBtn"></i>
+      </div>
+      
       <button onclick="window.loginSupervisor()">Login</button>
       <div class="footer">
         <div>@Pengawas SMPN 2 Pajangan</div>
@@ -680,21 +711,41 @@
     function attachEventListeners() {
         const roomInput = document.getElementById('roomNumber');
         const passwordInput = document.getElementById('password');
+        const togglePasswordBtn = document.getElementById('togglePasswordBtn');
 
-        const handleEnter = (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                window.loginSupervisor();
-            }
-        };
+        if (roomInput) {
+            roomInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (passwordInput) passwordInput.focus();
+                }
+            });
+        }
 
-        if (roomInput) roomInput.addEventListener('keydown', handleEnter);
-        if (passwordInput) passwordInput.addEventListener('keydown', handleEnter);
+        if (passwordInput) {
+            passwordInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    window.loginSupervisor();
+                }
+            });
+        }
+        
+        if (togglePasswordBtn && passwordInput) {
+            togglePasswordBtn.addEventListener('click', () => {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                togglePasswordBtn.classList.toggle('fa-eye');
+                togglePasswordBtn.classList.toggle('fa-eye-slash');
+            });
+        }
     }
 
     document.addEventListener('DOMContentLoaded', async () => {
         window.updateTime();
         ['mousemove', 'keypress', 'scroll', 'click'].forEach(evt => window.addEventListener(evt, window.resetInactivityTimer));
+        
+        attachEventListeners(); // Attach listeners for login form
 
         if (localStorage.getItem('isSupervisorLoggedIn') === 'true' && localStorage.getItem('supervisorRoom') && localStorage.getItem('supervisorDbGroupNames')) {
             supervisorRoom = localStorage.getItem('supervisorRoom');
@@ -714,7 +765,6 @@
             loginSection.style.display = 'block';
             supervisorDashboardContent.style.display = 'none';
         }
-        attachEventListeners();
     });
 
     async function loadStudentsForRoom() {
