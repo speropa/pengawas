@@ -39,8 +39,19 @@
       box-sizing: border-box;
     }
 
+    /* Style Label Input */
+    .input-label {
+        display: block;
+        margin-bottom: 6px;
+        font-weight: 600;
+        color: #34495e;
+        font-size: 14px;
+        text-align: left;
+    }
+
     input, select, textarea {
-      padding: 12px; margin: 8px 0; width: 100%;
+      padding: 12px; margin: 0 0 15px 0; /* Adjusted margin bottom */
+      width: 100%;
       box-sizing: border-box; font-size: 16px;
       border: 1px solid #ccc; border-radius: 6px;
       transition: border-color 0.3s ease, box-shadow 0.3s ease;
@@ -55,9 +66,11 @@
     .password-wrapper {
         position: relative;
         width: 100%;
+        margin-bottom: 15px;
     }
     .password-wrapper input {
         padding-right: 40px; /* Beri ruang untuk ikon mata */
+        margin-bottom: 0; /* Margin ditangani oleh wrapper */
     }
     .toggle-password {
         position: absolute;
@@ -348,8 +361,12 @@
       
       <h3 style="text-align: center; color: #2c3e50;">LOGIN PENGAWAS</h3>
       <p id="loginError" class="error"></p>
-      <input type="text" id="roomNumber" placeholder="Nomor Ruangan (contoh: 01)" />
       
+      <label for="roomNumber" class="input-label">Masukkan Ruang/Kelas</label>
+      <!-- Placeholder diperbarui untuk fleksibilitas input -->
+      <input type="text" id="roomNumber" placeholder="Contoh: 01 atau 7A" />
+      
+      <label for="password" class="input-label">Masukkan Password</label>
       <!-- Wrapper untuk password dan ikon mata -->
       <div class="password-wrapper">
           <input type="password" id="password" placeholder="Password" />
@@ -365,7 +382,8 @@
 
     <div id="supervisorDashboardContent" style="display:none;">
       <div id="studentSection" class="supervisor-section container">
-        <h1 id="studentSectionTitle" style="text-transform: uppercase; text-align: center; color: #34495e;">DAFTAR PESERTA RUANGAN <span id="displayRoomNumber"></span></h1>
+        <!-- Judul akan diupdate via JS (Ruangan XX atau Kelas XX) -->
+        <h1 id="studentSectionTitle" style="text-transform: uppercase; text-align: center; color: #34495e;">DAFTAR PESERTA <span id="displayRoomNumber"></span></h1>
         
         <div class="controls-header">
             <div class="actions-group">
@@ -526,7 +544,8 @@
     const INACTIVITY_TIMEOUT = 60 * 60 * 1000;
 
     let inactivityTimer;
-    let supervisorRoom = null;
+    let supervisorRoom = null; // Menyimpan ID ruangan (misal "01") ATAU nama kelas (misal "7A")
+    let supervisorViewType = 'ROOM'; // 'ROOM' atau 'CLASS'
     let supervisorDbGroupNames = [];
     let supervisorDbInstances = [];
 
@@ -592,18 +611,21 @@
         document.body.style.alignItems = 'flex-start';
         document.body.style.justifyContent = 'flex-start';
 
-        displayRoomNumber.innerText = supervisorRoom;
+        // Update Judul Berdasarkan Tipe Tampilan
+        if (supervisorViewType === 'CLASS') {
+            displayRoomNumber.innerText = `KELAS ${supervisorRoom}`;
+        } else {
+            displayRoomNumber.innerText = `RUANGAN ${supervisorRoom}`;
+        }
 
         supervisorDbInstances = supervisorDbGroupNames.map(dbName => dbInstances[dbName]).filter(Boolean);
 
         if (supervisorDbInstances.length === 0) {
-            window.showNotification("Tidak ada konfigurasi database yang ditemukan untuk ruangan ini. Silakan hubungi admin.");
+            window.showNotification("Tidak ada konfigurasi database yang ditemukan untuk pilihan ini. Silakan hubungi admin.");
             window.confirmLogoutSupervisor();
             return;
         }
         
-        // Ensure auth for selected instances before loading data
-        // REPLACE signInAnonymously with signInWithEmailAndPassword
         await Promise.all(supervisorDbInstances.map(async (db) => {
             const auth = authInstances[db.app.name];
             if(auth && !auth.currentUser) {
@@ -627,7 +649,7 @@
     };
     
     window.loginSupervisor = async () => {
-        const room = document.getElementById("roomNumber").value.trim();
+        const rawInput = document.getElementById("roomNumber").value.trim().toUpperCase();
         const p = document.getElementById("password").value.trim();
         const loginError = document.getElementById("loginError");
 
@@ -638,22 +660,36 @@
             return;
         }
 
-        if (!/^\d{2}$/.test(room)) {
-            loginError.innerText = "Nomor ruangan tidak valid (contoh: 01).";
+        // Validasi Format Input:
+        // - Angka (1-2 digit) -> Ruangan
+        // - Angka + Huruf (misal 7A, 9C) -> Kelas
+        const isRoomFormat = /^\d{1,2}$/.test(rawInput);
+        const isClassFormat = /^[789][A-Z]$/.test(rawInput);
+
+        if (!isRoomFormat && !isClassFormat) {
+            loginError.innerText = "Format salah! Masukkan angka (contoh: 1, 01) untuk Ruangan, atau Kelas (contoh: 7A).";
             return;
         }
 
         loadingOverlay.style.display = 'flex';
 
         try {
-            // AUTHENTICATE ALL APPS BEFORE QUERYING
-            // Because rules require auth != null to read
-            // REPLACE signInAnonymously with signInWithEmailAndPassword
+            // Login ke semua DB dulu untuk bisa baca data
             await Promise.all(Object.values(authInstances).map(auth => {
                 if (!auth.currentUser) return signInWithEmailAndPassword(auth, GLOBAL_USER_EMAIL, GLOBAL_USER_PASS);
                 return Promise.resolve();
             }));
 
+            // Tentukan Identifier dan Tipe View
+            let targetIdentifier = rawInput;
+            let viewType = 'CLASS';
+
+            if (isRoomFormat) {
+                targetIdentifier = rawInput.padStart(2, '0'); // Ubah "1" jadi "01"
+                viewType = 'ROOM';
+            }
+
+            // Cari siswa yang cocok di semua DB
             const allStudentsAcrossDbs = [];
             await Promise.all(Object.keys(dbInstances).map(dbName => {
                 return new Promise((resolve, reject) => {
@@ -666,36 +702,48 @@
                         });
                         resolve();
                     }, (error) => {
-                        console.error(`Error loading students from ${dbName} for login inference:`, error);
+                        console.error(`Error loading students from ${dbName}:`, error);
                         reject(error);
                     }, { onlyOnce: true });
                 });
             }));
 
             const relevantDbGroupNames = new Set();
-            let foundStudentInRoom = false;
+            let foundStudent = false;
+
             allStudentsAcrossDbs.forEach(student => {
-                if (padRoomNumber(student.room) === padRoomNumber(room)) {
+                let match = false;
+                if (viewType === 'ROOM') {
+                    if (padRoomNumber(student.room) === targetIdentifier) match = true;
+                } else {
+                    // View Type CLASS
+                    if (student.class.toUpperCase() === targetIdentifier) match = true;
+                }
+
+                if (match) {
                     relevantDbGroupNames.add(student.firebaseGroup);
-                    foundStudentInRoom = true;
+                    foundStudent = true;
                 }
             });
 
-            if (!foundStudentInRoom) {
-                loginError.innerText = "Tidak ada siswa yang terdaftar di ruangan ini.";
+            if (!foundStudent) {
+                loginError.innerText = `Tidak ada siswa ditemukan untuk ${viewType === 'ROOM' ? 'Ruangan' : 'Kelas'} ${targetIdentifier}.`;
                 return;
             }
 
             if (relevantDbGroupNames.size === 0) {
-                loginError.innerText = "Tidak dapat menemukan database yang relevan untuk ruangan ini.";
+                loginError.innerText = "Database relevan tidak ditemukan.";
                 return;
             }
 
-            supervisorRoom = room;
+            // Simpan State
+            supervisorRoom = targetIdentifier;
+            supervisorViewType = viewType;
             supervisorDbGroupNames = Array.from(relevantDbGroupNames);
             
             localStorage.setItem('isSupervisorLoggedIn', 'true');
             localStorage.setItem('supervisorRoom', supervisorRoom);
+            localStorage.setItem('supervisorViewType', supervisorViewType);
             localStorage.setItem('supervisorDbGroupNames', JSON.stringify(supervisorDbGroupNames));
 
             window.initializeAppState();
@@ -745,19 +793,18 @@
         window.updateTime();
         ['mousemove', 'keypress', 'scroll', 'click'].forEach(evt => window.addEventListener(evt, window.resetInactivityTimer));
         
-        attachEventListeners(); // Attach listeners for login form
+        attachEventListeners();
 
         if (localStorage.getItem('isSupervisorLoggedIn') === 'true' && localStorage.getItem('supervisorRoom') && localStorage.getItem('supervisorDbGroupNames')) {
             supervisorRoom = localStorage.getItem('supervisorRoom');
+            supervisorViewType = localStorage.getItem('supervisorViewType') || 'ROOM'; // Default ke ROOM jika tidak ada
             supervisorDbGroupNames = JSON.parse(localStorage.getItem('supervisorDbGroupNames'));
             
             if (supervisorDbGroupNames.length > 0) {
                 window.initializeAppState();
             } else {
-                console.error("No supervisor DB group names found in localStorage.");
+                // Reset jika data korup
                 localStorage.removeItem('isSupervisorLoggedIn');
-                localStorage.removeItem('supervisorRoom');
-                localStorage.removeItem('supervisorDbGroupNames');
                 loginSection.style.display = 'block';
                 supervisorDashboardContent.style.display = 'none';
             }
@@ -777,7 +824,17 @@
                         const data = child.val();
                         data.key = child.key;
                         data.firebaseGroup = db.app.name;
-                        if (padRoomNumber(data.room) === padRoomNumber(supervisorRoom)) {
+                        
+                        // Logika Filter Baru
+                        let match = false;
+                        if (supervisorViewType === 'ROOM') {
+                            if (padRoomNumber(data.room) === supervisorRoom) match = true;
+                        } else {
+                            // Class View
+                            if (data.class.toUpperCase() === supervisorRoom) match = true;
+                        }
+
+                        if (match) {
                             studentsInGroup.push(data);
                         }
                     });
