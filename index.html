@@ -450,104 +450,32 @@
     import { getDatabase, ref, onValue, update, remove } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-database.js";
     import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-auth.js";
 
-    // Konfigurasi Firebase dari file ujian terbaru (Diperbarui)
-    const allFirebaseConfigs = {
-        'kelas7-group1': { /* 7ABC */
-            apiKey: "AIzaSyBAKwT7JY_HGnvK6h3u30-dfgRPXfef8l8",
-            authDomain: "abc-a13ea.firebaseapp.com",
-            databaseURL: "https://abc-a13ea-default-rtdb.firebaseio.com",
-            projectId: "abc-a13ea",
-            storageBucket: "abc-a13ea.firebasestorage.app",
-            messagingSenderId: "1052966795599",
-            appId: "1:1052966795599:web:d4d331199ca9081321ed3a"
-        },
-        'kelas7-group2': { /* 7DEF */
-            apiKey: "AIzaSyBkhBZw3oADXUAJ9FXY9-g7XBsSmQhzZVk",
-            authDomain: "def-ab5ee.firebaseapp.com",
-            databaseURL: "https://def-ab5ee-default-rtdb.firebaseio.com",
-            projectId: "def-ab5ee",
-            storageBucket: "def-ab5ee.firebasestorage.app",
-            messagingSenderId: "129712840107",
-            appId: "1:129712840107:web:ab10576fed95f735dd46ee"
-        },
-        'kelas8-group1': { /* 8ABC */
-            apiKey: "AIzaSyAwilwwwEJ2MAdSf09BotxNH-z6RiXaHXY",
-            authDomain: "abc-43e73.firebaseapp.com",
-            databaseURL: "https://abc-43e73-default-rtdb.firebaseio.com",
-            projectId: "abc-43e73",
-            storageBucket: "abc-43e73.firebasestorage.app",
-            messagingSenderId: "1043754727577",
-            appId: "1:1043754727577:web:56c3732bf2a6ac900c2008"
-        },
-        'kelas8-group2': { /* 8DEF */
-            apiKey: "AIzaSyBeCI57lmZ4-8DAKYJ7nvYjnXOfvy0vqrk",
-            authDomain: "def-efcb2.firebaseapp.com",
-            databaseURL: "https://def-efcb2-default-rtdb.firebaseio.com",
-            projectId: "def-efcb2",
-            storageBucket: "def-efcb2.firebasestorage.app",
-            messagingSenderId: "12569956361",
-            appId: "1:12569956361:web:fea36c4e034e65f33ba8d8"
-        },
-        'kelas9-group1': { /* 9ABC */
-            apiKey: "AIzaSyBZ6JR3ggnUiZFQ-wdrewbfhzMUwFaGGzQ",
-            authDomain: "abc-d272a.firebaseapp.com",
-            databaseURL: "https://abc-d272a-default-rtdb.firebaseio.com",
-            projectId: "abc-d272a",
-            storageBucket: "abc-d272a.firebasestorage.app",
-            messagingSenderId: "1036605132828",
-            appId: "1:1036605132828:web:2b59f91290d50afe304fd9"
-        },
-        'kelas9-group2': { /* 9DEF */
-            apiKey: "AIzaSyC2iwuDMWTaJIG8g464Wt0En3CXI2DZiz4",
-            authDomain: "def-85f32.firebaseapp.com",
-            databaseURL: "https://def-85f32-default-rtdb.firebaseio.com",
-            projectId: "def-85f32",
-            storageBucket: "def-85f32.firebasestorage.app",
-            messagingSenderId: "82670626048",
-            appId: "1:82670626048:web:f5fdfda8fe078245b6bfe5"
-        }
+    // Kredensial Firebase TUNGGAL (setup-73809) sesuai permintaan
+    const centralFirebaseConfig = {
+        apiKey: "AIzaSyBbXJ4VuACXyHJhl2eVSB2vHiT6hrx-XnE",
+        authDomain: "setup-73809.firebaseapp.com",
+        databaseURL: "https://setup-73809-default-rtdb.firebaseio.com",
+        projectId: "setup-73809",
+        storageBucket: "setup-73809.firebasestorage.app",
+        messagingSenderId: "843995999446",
+        appId: "1:843995999446:web:7fd92546f2d0bea73fed77"
     };
-    
+
     // Kredensial Global (dari web siswa)
     const GLOBAL_USER_EMAIL = "speropa@gmail.com";
     const GLOBAL_USER_PASS = "Pajangan201184*";
     
-    const dbInstances = {};
-    const authInstances = {};
-
-    for (const groupKey in allFirebaseConfigs) {
-        if (allFirebaseConfigs.hasOwnProperty(groupKey)) {
-            const config = allFirebaseConfigs[groupKey];
-            const appInstance = initializeApp(config, groupKey); 
-            dbInstances[groupKey] = getDatabase(appInstance);
-            authInstances[groupKey] = getAuth(appInstance);
-        }
-    }
-    
-    // Update Mapping agar sesuai dengan key baru
-    const gradeToDbGroupMap = {
-        '7': ['kelas7-group1', 'kelas7-group2'],
-        '8': ['kelas8-group1', 'kelas8-group2'],
-        '9': ['kelas9-group1', 'kelas9-group2']
-    };
-
-    const rombelToDbMap = {
-        '7A': 'kelas7-group1', '7B': 'kelas7-group1', '7C': 'kelas7-group1', 
-        '7D': 'kelas7-group2', '7E': 'kelas7-group2', '7F': 'kelas7-group2',
-        '8A': 'kelas8-group1', '8B': 'kelas8-group1', '8C': 'kelas8-group1', 
-        '8D': 'kelas8-group2', '8E': 'kelas8-group2', '8F': 'kelas8-group2',
-        '9A': 'kelas9-group1', '9B': 'kelas9-group1', '9C': 'kelas9-group1', 
-        '9D': 'kelas9-group2', '9E': 'kelas9-group2', '9F': 'kelas9-group2'
-    };
+    // Inisialisasi Firebase TUNGGAL
+    const app = initializeApp(centralFirebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth(app);
 
     const SUPERVISOR_PASS = "12345";
     const INACTIVITY_TIMEOUT = 60 * 60 * 1000;
 
     let inactivityTimer;
-    let supervisorRoom = null; // Menyimpan ID ruangan (misal "01") ATAU nama kelas (misal "7A")
+    let supervisorRoom = null; 
     let supervisorViewType = 'ROOM'; // 'ROOM' atau 'CLASS'
-    let supervisorDbGroupNames = [];
-    let supervisorDbInstances = [];
 
     let tokenCache = [];
     let studentCache = [];
@@ -618,20 +546,16 @@
             displayRoomNumber.innerText = `RUANGAN ${supervisorRoom}`;
         }
 
-        supervisorDbInstances = supervisorDbGroupNames.map(dbName => dbInstances[dbName]).filter(Boolean);
-
-        if (supervisorDbInstances.length === 0) {
-            window.showNotification("Tidak ada konfigurasi database yang ditemukan untuk pilihan ini. Silakan hubungi admin.");
-            window.confirmLogoutSupervisor();
-            return;
-        }
-        
-        await Promise.all(supervisorDbInstances.map(async (db) => {
-            const auth = authInstances[db.app.name];
-            if(auth && !auth.currentUser) {
+        if(!auth.currentUser) {
+            try {
                 await signInWithEmailAndPassword(auth, GLOBAL_USER_EMAIL, GLOBAL_USER_PASS);
+            } catch (error) {
+                console.error("Gagal login otomatis:", error);
+                window.showNotification("Gagal terhubung ke database. Silakan coba lagi.");
+                window.confirmLogoutSupervisor();
+                return;
             }
-        }));
+        }
 
         await Promise.all([
             loadStudentsForRoom(),
@@ -661,8 +585,6 @@
         }
 
         // Validasi Format Input:
-        // - Angka (1-2 digit) -> Ruangan
-        // - Angka + Huruf (misal 7A, 9C) -> Kelas
         const isRoomFormat = /^\d{1,2}$/.test(rawInput);
         const isClassFormat = /^[789][A-Z]$/.test(rawInput);
 
@@ -674,11 +596,8 @@
         loadingOverlay.style.display = 'flex';
 
         try {
-            // Login ke semua DB dulu untuk bisa baca data
-            await Promise.all(Object.values(authInstances).map(auth => {
-                if (!auth.currentUser) return signInWithEmailAndPassword(auth, GLOBAL_USER_EMAIL, GLOBAL_USER_PASS);
-                return Promise.resolve();
-            }));
+            // Login ke DB TUNGGAL
+            if (!auth.currentUser) await signInWithEmailAndPassword(auth, GLOBAL_USER_EMAIL, GLOBAL_USER_PASS);
 
             // Tentukan Identifier dan Tipe View
             let targetIdentifier = rawInput;
@@ -689,39 +608,23 @@
                 viewType = 'ROOM';
             }
 
-            // Cari siswa yang cocok di semua DB
-            const allStudentsAcrossDbs = [];
-            await Promise.all(Object.keys(dbInstances).map(dbName => {
-                return new Promise((resolve, reject) => {
-                    onValue(ref(dbInstances[dbName], 'students'), (snapshot) => {
-                        snapshot.forEach(child => {
-                            const data = child.val();
-                            data.key = child.key;
-                            data.firebaseGroup = dbName;
-                            allStudentsAcrossDbs.push(data);
-                        });
-                        resolve();
-                    }, (error) => {
-                        console.error(`Error loading students from ${dbName}:`, error);
-                        reject(error);
-                    }, { onlyOnce: true });
-                });
-            }));
-
-            const relevantDbGroupNames = new Set();
+            // Ambil semua siswa dari DB tunggal
+            const snapshot = await new Promise((resolve, reject) => {
+                onValue(ref(db, 'students'), (snap) => resolve(snap), { onlyOnce: true }, reject);
+            });
+            
             let foundStudent = false;
 
-            allStudentsAcrossDbs.forEach(student => {
+            snapshot.forEach(child => {
+                const student = child.val();
                 let match = false;
                 if (viewType === 'ROOM') {
                     if (padRoomNumber(student.room) === targetIdentifier) match = true;
                 } else {
-                    // View Type CLASS
                     if (student.class.toUpperCase() === targetIdentifier) match = true;
                 }
 
                 if (match) {
-                    relevantDbGroupNames.add(student.firebaseGroup);
                     foundStudent = true;
                 }
             });
@@ -731,20 +634,13 @@
                 return;
             }
 
-            if (relevantDbGroupNames.size === 0) {
-                loginError.innerText = "Database relevan tidak ditemukan.";
-                return;
-            }
-
             // Simpan State
             supervisorRoom = targetIdentifier;
             supervisorViewType = viewType;
-            supervisorDbGroupNames = Array.from(relevantDbGroupNames);
             
             localStorage.setItem('isSupervisorLoggedIn', 'true');
             localStorage.setItem('supervisorRoom', supervisorRoom);
             localStorage.setItem('supervisorViewType', supervisorViewType);
-            localStorage.setItem('supervisorDbGroupNames', JSON.stringify(supervisorDbGroupNames));
 
             window.initializeAppState();
 
@@ -795,19 +691,11 @@
         
         attachEventListeners();
 
-        if (localStorage.getItem('isSupervisorLoggedIn') === 'true' && localStorage.getItem('supervisorRoom') && localStorage.getItem('supervisorDbGroupNames')) {
+        if (localStorage.getItem('isSupervisorLoggedIn') === 'true' && localStorage.getItem('supervisorRoom')) {
             supervisorRoom = localStorage.getItem('supervisorRoom');
-            supervisorViewType = localStorage.getItem('supervisorViewType') || 'ROOM'; // Default ke ROOM jika tidak ada
-            supervisorDbGroupNames = JSON.parse(localStorage.getItem('supervisorDbGroupNames'));
+            supervisorViewType = localStorage.getItem('supervisorViewType') || 'ROOM'; 
             
-            if (supervisorDbGroupNames.length > 0) {
-                window.initializeAppState();
-            } else {
-                // Reset jika data korup
-                localStorage.removeItem('isSupervisorLoggedIn');
-                loginSection.style.display = 'block';
-                supervisorDashboardContent.style.display = 'none';
-            }
+            window.initializeAppState();
         } else {
             loginSection.style.display = 'block';
             supervisorDashboardContent.style.display = 'none';
@@ -816,136 +704,120 @@
 
     async function loadStudentsForRoom() {
         studentCache = [];
-        const promises = supervisorDbInstances.map(db => {
-            return new Promise((resolve, reject) => {
-                onValue(ref(db, 'students'), (snapshot) => {
-                    const studentsInGroup = [];
-                    snapshot.forEach(child => {
-                        const data = child.val();
-                        data.key = child.key;
-                        data.firebaseGroup = db.app.name;
-                        
-                        // Logika Filter Baru
-                        let match = false;
-                        if (supervisorViewType === 'ROOM') {
-                            if (padRoomNumber(data.room) === supervisorRoom) match = true;
-                        } else {
-                            // Class View
-                            if (data.class.toUpperCase() === supervisorRoom) match = true;
-                        }
-
-                        if (match) {
-                            studentsInGroup.push(data);
-                        }
-                    });
-                    studentCache = studentCache.filter(s => s.firebaseGroup !== db.app.name).concat(studentsInGroup);
+        return new Promise((resolve, reject) => {
+            onValue(ref(db, 'students'), (snapshot) => {
+                const studentsInGroup = [];
+                snapshot.forEach(child => {
+                    const data = child.val();
+                    data.key = child.key;
                     
-                    studentCache.sort((a, b) => {
-                        const classA = parseInt(getNumericClass(a.class) || '0');
-                        const classB = parseInt(getNumericClass(b.class) || '0');
-                        if (classA !== classB) return classA - classB;
+                    // Logika Filter
+                    let match = false;
+                    if (supervisorViewType === 'ROOM') {
+                        if (padRoomNumber(data.room) === supervisorRoom) match = true;
+                    } else {
+                        // Class View
+                        if (data.class.toUpperCase() === supervisorRoom) match = true;
+                    }
 
-                        const nameA = String(a.name || '').toUpperCase();
-                        const nameB = String(b.name || '').toUpperCase();
-                        return nameA.localeCompare(nameB);
-                    });
-
-                    window.renderStudentTableSupervisorWithCurrentState(currentPageStudent);
-                    resolve();
-                }, (error) => {
-                    console.error(`Error memuat siswa dari grup ${db.app.name}:`, error);
-                    reject(error);
+                    if (match) {
+                        studentsInGroup.push(data);
+                    }
                 });
+                
+                // Urutkan
+                studentCache = studentsInGroup.sort((a, b) => {
+                    const classA = parseInt(getNumericClass(a.class) || '0');
+                    const classB = parseInt(getNumericClass(b.class) || '0');
+                    if (classA !== classB) return classA - classB;
+
+                    const nameA = String(a.name || '').toUpperCase();
+                    const nameB = String(b.name || '').toUpperCase();
+                    return nameA.localeCompare(nameB);
+                });
+
+                window.renderStudentTableSupervisorWithCurrentState(currentPageStudent);
+                resolve();
+            }, (error) => {
+                console.error(`Error memuat siswa:`, error);
+                reject(error);
             });
         });
-        await Promise.all(promises);
     }
 
     async function loadTokensForSupervisor() {
         tokenCache = [];
         consolidatedTokensMap.clear();
 
-        const promises = supervisorDbInstances.map(db => {
-            return new Promise((resolve, reject) => {
-                onValue(ref(db, 'tokens'), (snapshot) => {
-                    const groupTokens = [];
-                    snapshot.forEach(child => {
-                        const data = child.val();
-                        data.key = child.key;
-                        data.firebaseGrade = getNumericClass(data.kelas);
-                        data.firebaseGroup = db.app.name;
-                        groupTokens.push(data);
-                    });
-                    tokenCache = tokenCache.filter(t => t.firebaseGroup !== db.app.name).concat(groupTokens);
-                    
-                    consolidatedTokensMap.clear();
-                    tokenCache.forEach(tokenData => {
-                        const consolidatedKey = `${tokenData.token}_${tokenData.kelas}`;
-                        if (!consolidatedTokensMap.has(consolidatedKey)) {
-                            consolidatedTokensMap.set(consolidatedKey, { ...tokenData, firebaseKeys: new Set([tokenData.key]), firebaseGroups: new Set([tokenData.firebaseGroup]) });
-                        } else {
-                            const existing = consolidatedTokensMap.get(consolidatedKey);
-                            existing.firebaseKeys.add(tokenData.key);
-                            existing.firebaseGroups.add(tokenData.firebaseGroup);
-                            existing.isForceActive = existing.isForceActive || tokenData.isForceActive;
-                            existing.isActive = existing.isActive || tokenData.isActive;
-                        }
-                    });
-
-                    window.renderActiveExamsInfo();
-                    window.periksaAndUpdateStatusToken();
-                    window.renderStudentTableSupervisorWithCurrentState(currentPageStudent);
-                    resolve();
-                }, (error) => {
-                    console.error(`Error memuat token dari grup ${db.app.name}:`, error);
-                    reject(error);
+        return new Promise((resolve, reject) => {
+            onValue(ref(db, 'tokens'), (snapshot) => {
+                tokenCache = [];
+                snapshot.forEach(child => {
+                    const data = child.val();
+                    data.key = child.key;
+                    data.firebaseGrade = getNumericClass(data.kelas);
+                    tokenCache.push(data);
                 });
+                
+                consolidatedTokensMap.clear();
+                tokenCache.forEach(tokenData => {
+                    const consolidatedKey = `${tokenData.token}_${tokenData.kelas}`;
+                    if (!consolidatedTokensMap.has(consolidatedKey)) {
+                        // Simpan dengan set key agar kompatibel dengan logika lama
+                        consolidatedTokensMap.set(consolidatedKey, { ...tokenData, firebaseKeys: new Set([tokenData.key]) });
+                    } else {
+                        const existing = consolidatedTokensMap.get(consolidatedKey);
+                        existing.firebaseKeys.add(tokenData.key);
+                        existing.isForceActive = existing.isForceActive || tokenData.isForceActive;
+                        existing.isActive = existing.isActive || tokenData.isActive;
+                    }
+                });
+
+                window.renderActiveExamsInfo();
+                window.periksaAndUpdateStatusToken();
+                window.renderStudentTableSupervisorWithCurrentState(currentPageStudent);
+                resolve();
+            }, (error) => {
+                console.error(`Error memuat token:`, error);
+                reject(error);
             });
         });
-        await Promise.all(promises);
     }
 
     async function loadTokenAccessStatus() {
         tokenAccessStatus = {};
-        const promises = supervisorDbInstances.map(db => {
-            return new Promise((resolve, reject) => {
-                onValue(ref(db, 'exam_access_status'), (snapshot) => {
-                    Object.assign(tokenAccessStatus, snapshot.val() || {});
-                    window.renderStudentTableSupervisorWithCurrentState(currentPageStudent);
-                    resolve();
-                }, (error) => {
-                    console.error(`Error memuat status akses ujian dari grup ${db.app.name}:`, error);
-                    reject(error);
-                });
+        return new Promise((resolve, reject) => {
+            onValue(ref(db, 'exam_access_status'), (snapshot) => {
+                Object.assign(tokenAccessStatus, snapshot.val() || {});
+                window.renderStudentTableSupervisorWithCurrentState(currentPageStudent);
+                resolve();
+            }, (error) => {
+                console.error(`Error memuat status akses ujian:`, error);
+                reject(error);
             });
         });
-        await Promise.all(promises);
     }
 
     async function loadSubmittedExamsStatus() {
         submittedExamsCache = {};
-        const promises = supervisorDbInstances.map(db => {
-            return new Promise((resolve, reject) => {
-                onValue(ref(db, 'submitted_exams'), (snapshot) => {
-                    Object.assign(submittedExamsCache, snapshot.val() || {});
-                    window.renderStudentTableSupervisorWithCurrentState(currentPageStudent);
-                    resolve();
-                }, (error) => {
-                    console.error(`Error memuat status submit ujian dari grup ${db.app.name}:`, error);
-                    reject(error);
-                });
+        return new Promise((resolve, reject) => {
+            onValue(ref(db, 'submitted_exams'), (snapshot) => {
+                Object.assign(submittedExamsCache, snapshot.val() || {});
+                window.renderStudentTableSupervisorWithCurrentState(currentPageStudent);
+                resolve();
+            }, (error) => {
+                console.error(`Error memuat status submit ujian:`, error);
+                reject(error);
             });
         });
-        await Promise.all(promises);
     }
 
     window.periksaAndUpdateStatusToken = () => {
         const now = new Date();
         tokenCache.forEach(tokenData => {
             const newIsActive = tokenData.isForceActive ? true : (now >= new Date(tokenData.startTime) && now < new Date(tokenData.endTime));
-            const targetDb = supervisorDbInstances.find(db => db.app.name === tokenData.firebaseGroup);
-            if (targetDb && tokenData.isActive !== newIsActive) {
-                update(ref(targetDb, `tokens/${tokenData.key}`), { isActive: newIsActive })
+            if (tokenData.isActive !== newIsActive) {
+                update(ref(db, `tokens/${tokenData.key}`), { isActive: newIsActive })
                     .catch(e => console.error(`Error mengupdate status token ${tokenData.key}:`, e));
             }
         });
@@ -973,7 +845,6 @@
         }).forEach(token => {
             const p = document.createElement('p');
             let forceActiveIndicator = token.isForceActive ? '<span class="force-active-indicator">(PAKSA AKTIF)</span>' : '';
-            // Removed duration display
             p.innerHTML = `<strong>Kelas ${token.kelas} - ${token.subject.toUpperCase()}</strong>: Token <strong>${token.token}</strong> ${forceActiveIndicator}`;
             
             const countdownSpan = document.createElement('span');
@@ -1027,6 +898,7 @@
 
             for (const tokenKey of tokenKeys) {
                 const tokenData = tokenCache.find(t => t.key === tokenKey);
+                // Cek kesesuaian kelas token dengan kelas siswa (ambil angkanya saja)
                 if (tokenData && getNumericClass(tokenData.kelas) === getNumericClass(student.class)) {
                     relevantExamFound = true;
                     const accessData = tokenAccessStatus[tokenKey]?.[student.id];
@@ -1060,16 +932,6 @@
             studentPaginationDiv.style.display = 'flex';
         }
 
-        studentsToDisplay.sort((a, b) => {
-            const classA = parseInt(getNumericClass(a.class) || '0');
-            const classB = parseInt(getNumericClass(b.class) || '0');
-            if (classA !== classB) return classA - classB;
-
-            const nameA = String(a.name || '').toUpperCase();
-            const nameB = String(b.name || '').toUpperCase();
-            return nameA.localeCompare(nameB);
-        });
-        
         filteredStudents = studentsToDisplay;
         const totalPages = Math.ceil(filteredStudents.length / selectedItemsPerPage);
         const startIndex = (currentPageStudent - 1) * selectedItemsPerPage;
@@ -1085,7 +947,7 @@
                 case 'Sudah submit': statusColor = '#27ae60'; break;
                 case 'Sedang mengerjakan': statusColor = '#f39c12'; break;
                 case 'Belum login (reset)': statusColor = '#8e44ad'; break;
-                case 'Belum Login': statusColor = '#e74c3c'; break; // Perbaikan: Sesuaikan case dengan status default
+                case 'Belum Login': statusColor = '#e74c3c'; break; 
                 case '-': statusColor = '#7f8c8d'; break;
             }
 
@@ -1151,37 +1013,22 @@
     };
 
     window.confirmResetStudentSupervisor = async () => {
-        if (!studentIdForAction || supervisorDbInstances.length === 0) return;
+        if (!studentIdForAction) return;
 
         loadingOverlay.style.display = 'flex';
         try {
             const updates = {};
-            const studentToReset = studentCache.find(s => s.key === studentKeyForAction);
-            if (!studentToReset) {
-                window.showNotification("Siswa tidak ditemukan.");
-                return;
-            }
-
-            const targetDb = supervisorDbInstances.find(db => db.app.name === rombelToDbMap[studentToReset.class]);
-            if (!targetDb) {
-                window.showNotification("Gagal: Database untuk kelas siswa tidak ditemukan.");
-                return;
-            }
-
-            // UPDATE: Tidak lagi mengubah node 'students' karena itu data master siswa
-            // HANYA mengubah exam_access_status untuk token yang relevan
-
+            
+            // Cari token aktif yang relevan untuk siswa ini
             const relevantTokens = tokenCache.filter(token =>
-                getNumericClass(token.kelas) === getNumericClass(studentToReset.class) &&
-                token.firebaseGroup === targetDb.app.name &&
+                getNumericClass(token.kelas) === getNumericClass(studentCache.find(s => s.key === studentKeyForAction)?.class) &&
                 (token.isActive || token.isForceActive)
             );
 
-            // Fallback jika tidak ada token aktif tapi statusnya 'sedang mengerjakan' (kemungkinan token baru saja nonaktif)
+            // Fallback jika tidak ada token aktif tapi statusnya 'sedang mengerjakan'
             if (relevantTokens.length === 0) {
                  const allClassTokens = tokenCache.filter(token =>
-                    getNumericClass(token.kelas) === getNumericClass(studentToReset.class) && 
-                    token.firebaseGroup === targetDb.app.name
+                    getNumericClass(token.kelas) === getNumericClass(studentCache.find(s => s.key === studentKeyForAction)?.class)
                  );
                  // Cari token dimana siswa tercatat sedang login
                  for (const token of allClassTokens) {
@@ -1192,12 +1039,11 @@
             }
 
             for (const token of relevantTokens) {
-                // UPDATE: Mengubah menjadi false (bukan null) agar konsisten dengan Admin Panel
                 updates[`exam_access_status/${token.key}/${studentIdForAction}/isLoggedIn`] = false;
             }
 
             if (Object.keys(updates).length > 0) {
-                await update(ref(targetDb, '/'), updates);
+                await update(ref(db, '/'), updates);
                 window.showNotification(`Status login siswa ${studentIdForAction} berhasil direset.`);
             } else {
                 window.showNotification(`Tidak ada sesi aktif yang ditemukan untuk direset.`);
@@ -1219,7 +1065,7 @@
     window.closeResetStudentModalSupervisor = () => { document.getElementById('resetStudentModal').style.display = 'none'; studentKeyForAction = null; };
     window.promptLogoutSupervisor = () => document.getElementById('logoutConfirmModal').style.display = 'flex';
     window.closeLogoutModalSupervisor = () => document.getElementById('logoutConfirmModal').style.display = 'none';
-    window.confirmLogoutSupervisor = () => { localStorage.removeItem('isSupervisorLoggedIn'); localStorage.removeItem('supervisorRoom'); localStorage.removeItem('supervisorDbGroupNames'); location.reload(); };
+    window.confirmLogoutSupervisor = () => { localStorage.removeItem('isSupervisorLoggedIn'); localStorage.removeItem('supervisorRoom'); localStorage.removeItem('supervisorViewType'); location.reload(); };
 
   </script>
 </body>
