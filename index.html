@@ -450,16 +450,17 @@
     import { getDatabase, ref, onValue, update, remove } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-database.js";
     import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-auth.js";
 
-    // Kredensial Firebase TUNGGAL (setup-73809) sesuai permintaan
-const firebaseConfig = {
-  apiKey: "AIzaSyBAKwT7JY_HGnvK6h3u30-dfgRPXfef8l8",
-  authDomain: "abc-a13ea.firebaseapp.com",
-  databaseURL: "https://abc-a13ea-default-rtdb.firebaseio.com",
-  projectId: "abc-a13ea",
-  storageBucket: "abc-a13ea.firebasestorage.app",
-  messagingSenderId: "1052966795599",
-  appId: "1:1052966795599:web:d4d331199ca9081321ed3a"
-};
+    // Kredensial Firebase TUNGGAL (abc-a13ea) sesuai permintaan
+    // AppId telah dilengkapi berdasarkan data proyek yang sesuai
+    const centralFirebaseConfig = {
+        apiKey: "AIzaSyBAKwT7JY_HGnvK6h3u30-dfgRPXfef8l8",
+        authDomain: "abc-a13ea.firebaseapp.com",
+        databaseURL: "https://abc-a13ea-default-rtdb.firebaseio.com",
+        projectId: "abc-a13ea",
+        storageBucket: "abc-a13ea.firebasestorage.app",
+        messagingSenderId: "1052966795599",
+        appId: "1:1052966795599:web:d4d331199ca9081321ed3a"
+    };
 
     // Kredensial Global (dari web siswa)
     const GLOBAL_USER_EMAIL = "speropa@gmail.com";
